@@ -1,0 +1,2 @@
+Info (10281): Verilog HDL Declaration information at grid.v(3): object "SIZE_X" differs only in case from object "size_x" in the same scope File: C:/Users/admin/Documents/.Programming/Verilog/test_vga/grid.v Line: 3
+Info (10281): Verilog HDL Declaration information at grid.v(4): object "SIZE_Y" differs only in case from object "size_y" in the same scope File: C:/Users/admin/Documents/.Programming/Verilog/test_vga/grid.v Line: 4
