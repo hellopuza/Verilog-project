@@ -9,11 +9,12 @@ For those who want repite this project you need choose game.v as top module.
 ### button.v
 This module processes the signal from the button and converts it into a 1-clock signal when the button is released.
 
-input <br/>
-\t - rst : reset signal <br/>
-\t - clk : clock signal <br/>
-\t - in_key : button signal <br/>
+input
+- rst : reset signal <br/>
+- clk : clock signal <br/>
+- in_key : button signal <br/>
+
 output <br/>
-	- out_key : single-clock signal <br/>
+- out_key : single-clock signal <br/>
 
 
