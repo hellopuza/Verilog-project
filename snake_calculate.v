@@ -42,7 +42,7 @@ begin
 		previus_l <= 16'b100;
 		current_l <= 16'b100;
 		prev_key <= 2'b11;
-		coordinates[0]	<=	SIZE_X / 10;
+		coordinates[0] <=	SIZE_X / 10;
 		coordinates[8] <=	SIZE_Y / 10;
 		coordinates[16] <=	coordinates[0] - 1;
 		coordinates[24] <=	coordinates[8];
