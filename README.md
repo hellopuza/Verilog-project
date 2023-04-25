@@ -16,6 +16,9 @@ This module processes the signal from the button and converts it into a 1-clock 
 **output**  
 \- out_key : single-clock signal  
 
+### field_calculate.v
+The module calculates the field values after the next step
+
 **input**  
 \- clk : clock signal 
 \- rst : reset signal  
@@ -27,7 +30,7 @@ This module processes the signal from the button and converts it into a 1-clock 
 \- field : field filled with values  
 
 ### snake_calculate.v
-(Description ATTANTION 2 space at end)  
+Еhe module calculates changes in the coordinates and length of the snake  
 
 **input**  
 \- clk : clock signal 
