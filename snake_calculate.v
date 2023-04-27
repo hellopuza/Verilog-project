@@ -9,10 +9,10 @@ module snake_calculate
 	input	wire	step,  // signal next step in game and refresh screen
 	input	wire	start, // signal that game is started
 	input	wire	grow,  // signal that snake is grown
-	input	[0:1]	key,   // 00 - w, 01 - a, 11 - s, 10 - d
+	input	[1:0]	key,   // 00 - w, 01 - a, 11 - s, 10 - d
 
-	output	[0:15]	lengh, // snake's lengh
-	output	[0:8 * (SIZE_X * SIZE_Y) * 2 - 1]	snake_xy // array that contain snake's coordinates
+	output	[15:)]	lengh, // snake's lengh
+	output	[8 * (SIZE_X * SIZE_Y) * 2 - 1:0]	snake_xy // array that contain snake's coordinates
 	// for each snake's cells need 2 baits for x and y coordinates := 8 * 2
 	// max snake's lengh is full grid := SIZE_X * SIZE_Y
 	// total size := SIZE_X * SIZE_Y * 2 * 8
@@ -24,11 +24,11 @@ module snake_calculate
 	// ...
 );
 
-reg [0:1] prev_key;									// remember previous diraction key
-reg [0:15]	counter = 16'b0;						// counter for operate loop 
-reg [0:15]	previus_l = 16'b0;						// remember previous snake's lengh
-reg [0:15]	current_l = 16'b0;						// current snake's lengh
-reg [0:8 * (SIZE_X * SIZE_Y) * 2 - 1] coordinates;	// buffer for snake's coordinates
+reg [1:0] prev_key;									// remember previous diraction key
+reg [15:0]	counter = 16'b0;						// counter for operate loop 
+reg [15:0]	previus_l = 16'b0;						// remember previous snake's lengh
+reg [15:0]	current_l = 16'b0;						// current snake's lengh
+reg [8 * (SIZE_X * SIZE_Y) * 2 - 1:0] coordinates;	// buffer for snake's coordinates
 integer Gi;
 
 assign snake_xy = coordinates;
