@@ -7,18 +7,18 @@ module field_calculate
 	input	wire	clk,   // clock signal
 	input	wire	rst,   // reset signal
 	input	wire	step,  // signal next step in game and refresh screen
-	input	[0:15]	lengh, // snake's lengh
-	input	[0:8 * (SIZE_X * SIZE_Y) * 2 - 1]	snake_xy, // array that contain snake's coordinates
+	input	[15:0]	lengh, // snake's lengh
+	input	[8 * (SIZE_X * SIZE_Y) * 2 - 1:0]	snake_xy, // array that contain snake's coordinates
 
-	output	[0:15]	empty_cells,				// number of empty cells
-	output	[0:2 * SIZE_X * SIZE_Y - 1]	field	// describe field
+	output	[15:0]	empty_cells,				// number of empty cells
+	output	[2 * SIZE_X * SIZE_Y - 1:0]	field	// describe field
 	// each cell contain 2 bits: 00 - cell empty, 01 - snake, 10 - apple, 11 - block
 	// total cell: SIZE_X * SIZE_Y
 );
 
-reg [0:15] emp_cells;
-reg [0:2 * SIZE_X * SIZE_Y - 1] temp_field;
-reg [0:15] temp;
+reg [15:0] emp_cells;
+reg [2 * SIZE_X * SIZE_Y - 1:0] temp_field;
+reg [15:0] temp;
 
 assign empty_cells = emp_cells;
 assign field = temp_field;
@@ -37,8 +37,12 @@ begin
 	begin
 		for (temp = 0; temp < lengh; temp = temp + 1) 
 		begin
-			temp_field[snake_xy[temp] + snake_xy[temp + 8] * SIZE_X] <= 2'b01;
-		end	
+			temp_field[snake_xy[temp] * 2 + snake_xy[temp + 8] * SIZE_X * 2] <= 2'b01;
+		end
+		for (temp = 0; temp < (SIZE_X * SIZE_Y - 1); temp = temp + 1)
+		begin
+			emp_cells = (temp_field[2 * temp] == 2'b01) ? emp_cells : emp_cells + 1;
+		end
 	end
 end
 endmodule
