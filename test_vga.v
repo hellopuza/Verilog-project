@@ -49,39 +49,6 @@ vga vga
     .point_pos_y    (point_pos_y)
 );
 
-wire [$clog2(`GRID_SIZE_X)-1:0] cell_pos_x;
-wire [$clog2(`GRID_SIZE_Y)-1:0] cell_pos_y;
-wire grid_point_inside;
-wire [1:0] grid_cell_type;
-localparam gd_bits = 2 * `GRID_SIZE_X * `GRID_SIZE_Y;
-reg [gd_bits-1:0] grid_data;
-grid
-#(
-    .SIZE_X         (`GRID_SIZE_X),
-    .SIZE_Y         (`GRID_SIZE_Y),
-    .CELL_SIZE      (`GRID_CELL_SIZE),
-    .LINE_THICKNESS (`GRID_LINE_THICKNESS),
-    .CELL_BITS      (2)
-) grid
-(
-    .pos_x          ((640 - `GRID_SIZE_X * `GRID_CELL_SIZE) / 2),
-    .pos_y          ((480 - `GRID_SIZE_Y * `GRID_CELL_SIZE) / 2),
-    .point_pos_x    (point_pos_x),
-    .point_pos_y    (point_pos_y),
-    .data           (grid_data),
-    .point_inside   (grid_point_inside),
-    .cell_type      (grid_cell_type)
-);
-
-colors colors
-(
-    .grid_point_inside  (grid_point_inside),
-    .grid_cell_type     (grid_cell_type),
-    .red                (vga_r),
-    .green              (vga_g),
-    .blue               (vga_b)
-);
-
 wire [7:0] key;
 wire key_pressed;
 keyboard keyboard
@@ -160,27 +127,54 @@ field_calculate
     .snake_xy   (snake_xy),
     .empty_cells (empty_cells),
     .field (field),
+    .dead    (beh[0]),
+    .grow     (beh[1])
+);
+
+game_behavior
+#(
+    .SIZE_X         (`GRID_SIZE_X),
+    .SIZE_Y         (`GRID_SIZE_Y)
+) game_behavior
+(
+    .clk    (clk),
+    .rst    (rst),
+    .check   (field2apple),
+    .key    (true_key),
+    .snake_xy   (snake_xy),
+    .field (field),
     .field2apple (field2apple)
 );
 
-integer ix, iy;
+wire [$clog2(`GRID_SIZE_X)-1:0] cell_pos_x;
+wire [$clog2(`GRID_SIZE_Y)-1:0] cell_pos_y;
+wire grid_point_inside;
+wire [1:0] grid_cell_type;
+grid
+#(
+    .SIZE_X         (`GRID_SIZE_X),
+    .SIZE_Y         (`GRID_SIZE_Y),
+    .CELL_SIZE      (`GRID_CELL_SIZE),
+    .LINE_THICKNESS (`GRID_LINE_THICKNESS),
+    .CELL_BITS      (2)
+) grid
+(
+    .pos_x          ((640 - `GRID_SIZE_X * `GRID_CELL_SIZE) / 2),
+    .pos_y          ((480 - `GRID_SIZE_Y * `GRID_CELL_SIZE) / 2),
+    .point_pos_x    (point_pos_x),
+    .point_pos_y    (point_pos_y),
+    .data           (field),
+    .point_inside   (grid_point_inside),
+    .cell_type      (grid_cell_type)
+);
 
-always @(posedge clk)
-begin
-    if (rst)
-        grid_data <= {gd_bits{1'd0}};
-
-    else if (set)
-        grid_data <= {gd_bits{1'd1}};
-
-    else if (key_pressed)
-    begin
-        if (key == `KEY_LSHIFT)
-            grid_data <= grid_data << 1;
-
-        else if (key == `KEY_RSHIFT)
-            grid_data <= grid_data >> 1;
-    end
-end
+colors colors
+(
+    .grid_point_inside  (grid_point_inside),
+    .grid_cell_type     (grid_cell_type),
+    .red                (vga_r),
+    .green              (vga_g),
+    .blue               (vga_b)
+);
 
 endmodule

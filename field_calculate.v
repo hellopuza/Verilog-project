@@ -14,8 +14,8 @@ module field_calculate
 	input	[SNAKE_SIZE - 1:0]	snake_xy, // array that contain snake's coordinates
 
 	output	[15:0]	empty_cells,				// number of empty cells
-	output	[FIELD_SIZE - 1:0]	field	// describe field
-	output  reg field2apple;
+	output	[FIELD_SIZE - 1:0]	field,	// describe field
+	output  reg field2apple
 	// each cell contain 2 bits: 00 - cell empty, 01 - snake, 10 - apple, 11 - block
 	// total cell: SIZE_X * SIZE_Y
 );
@@ -23,10 +23,10 @@ module field_calculate
 reg [15:0] emp_cells;
 reg [15:0] emp;
 reg [FIELD_SIZE - 1:0] temp_field;
-reg [15:0] temp;
 wire [6:0] rand;
 reg gen_flag;
 
+integer temp;
 assign empty_cells = emp_cells;
 assign field = temp_field;
 
@@ -37,7 +37,7 @@ begin
 	begin
 		emp_cells <= 16'b0;
 		emp <= 16'b0;
-		temp_field <= {FIELD_SIZE{1'b0}};
+		temp_field <= {{(FIELD_SIZE - 2){1'b0}}, 2'b10};
 	end
 	if (step) 
 	begin

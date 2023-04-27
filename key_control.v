@@ -1,3 +1,5 @@
+`include "keys.v"
+
 module key_control (
     input          clk,
     input          rst,
@@ -18,13 +20,13 @@ begin
     
     else if (key_pressed)
     begin
-        if (key == KEY_W)
+        if (key == `KEY_W)
             snake_dir <= 2'b00;
-        else if (key == KEY_A)
+        if (key == `KEY_A)
             snake_dir <= 2'b01;
-        else if (key == KEY_S)
+        if (key == `KEY_S)
             snake_dir <= 2'b11;
-        else if (key == KEY_D)
+        if (key == `KEY_D)
             snake_dir <= 2'b10;
     end
 

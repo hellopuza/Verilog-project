@@ -21,7 +21,7 @@ reg [1:0] result;
 assign dead = result[0];
 assign grow = result[1];
 
-always (@posedge clk)
+always @(posedge clk)
 begin
 	if (rst) 
 	begin
@@ -30,9 +30,9 @@ begin
 	else
 	if (check)
 	begin
-		if ((snake_xy[7:0] == 0 && key == 2'b01) || snake_xy[7:0] == (SIZE_X - 1) && key == 2'b10) result <= 2'b01; // left-right border dead
+		if (((snake_xy[7:0] == 0) && (key == 2'b01)) || snake_xy[7:0] == (SIZE_X - 1) && key == 2'b10) result <= 2'b01; // left-right border dead
 		else
-		if ((snake_xy[7:0] == 0 && key == 2'b00) || snake_xy[7:0] == (SIZE_X - 1) && key == 2'b11) result <= 2'b01; // up-down border dead
+		if (((snake_xy[7:0] == 0) && (key == 2'b00)) || snake_xy[7:0] == (SIZE_X - 1) && key == 2'b11) result <= 2'b01; // up-down border dead
 		else
 		if (index == (SIZE_X * SIZE_Y - 1)) // right-down corner 
 		begin
