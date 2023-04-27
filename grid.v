@@ -1,12 +1,13 @@
 module grid
 #(
-	parameter   SIZE_X         = 10,
-	parameter   SIZE_Y         = 10,
-	parameter   CELL_SIZE      = 10,
-	parameter   LINE_THICKNESS = 1,
+    parameter   SIZE_X         = 10,
+    parameter   SIZE_Y         = 10,
+    parameter   CELL_SIZE      = 10,
+    parameter   LINE_THICKNESS = 1,
+    parameter   CELL_BITS      = 1,
     parameter   XBITS          = $clog2(SIZE_X),
     parameter   YBITS          = $clog2(SIZE_Y),
-    parameter   GDBITS         = SIZE_X * SIZE_Y
+    parameter   GDBITS         = CELL_BITS * SIZE_X * SIZE_Y
 )
 (
     input   [9:0]           pos_x,
@@ -15,8 +16,10 @@ module grid
     input   [9:0]           point_pos_y,
     input   [GDBITS-1:0]    data,
 
-    output              point_inside,
-    output              cell_is_on
+    output  [XBITS-1:0]     cell_pos_x,
+    output  [YBITS-1:0]     cell_pos_y,
+    output                  point_inside,
+    output  [CELL_BITS-1:0] cell_type
 );
 
 localparam size_x = SIZE_X * CELL_SIZE;
@@ -48,9 +51,15 @@ begin: loop_y
 end
 endgenerate
 
-wire [XBITS-1:0] i_x = indexes_x[SIZE_X-1];
-wire [YBITS-1:0] i_y = indexes_y[SIZE_Y-1];
+assign cell_pos_x = indexes_x[SIZE_X-1];
+assign cell_pos_y = indexes_y[SIZE_Y-1];
 
-assign cell_is_on = (i_x == SIZE_X) | (i_y == SIZE_Y) ? 1'd0 : data[i_y * SIZE_X + i_x];
+wire [$clog2(GDBITS)-1:0] index = (cell_pos_y * SIZE_X + cell_pos_x) * CELL_BITS;
+
+generate for (Gi = 0; Gi < CELL_BITS; Gi = Gi + 1)
+begin: loop_cell
+    assign cell_type[Gi] = data[index + Gi];
+end
+endgenerate
 
 endmodule

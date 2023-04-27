@@ -1,13 +1,16 @@
-module random
+module tick_timer
 #(
     parameter   MODULUS = 10,
     parameter   NBITS   = $clog2(MODULUS)
 )
 (
-    input               clk,
-    input               rst,
-    output  [NBITS-1:0] number
+    input   clk,
+    input   rst,
+    input   incr,
+    output  tick
 );
+
+wire [NBITS-1:0] number;
 
 counter
 #(
@@ -16,10 +19,12 @@ counter
 (
     .clk        (clk),
     .rst        (rst),
-    .incr       (1'd1),
+    .incr       (incr),
     .number     (number),
     .set_data   (),
     .data       ()
 );
+
+assign tick = (number == MODULUS - 1);
 
 endmodule

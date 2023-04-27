@@ -1,9 +1,8 @@
-`include "keys.v"
-
-`define GRID_SIZE_X 30
+`define GRID_SIZE_X 40
 `define GRID_SIZE_Y 30
 `define GRID_CELL_SIZE 10
 `define GRID_LINE_THICKNESS 1
+`define TICK_TIME_CLK 12000000
 
 module test_vga (
     input           clk,
@@ -35,27 +34,8 @@ button button_set
     .out_key    (set)
 );
 
-wire rnd;
-button button_rnd
-(
-    .rst        (rst),
-    .clk        (clk),
-    .in_key     (key2_rnd),
-    .out_key    (rnd)
-);
-
-wire rnd_cell;
-button button_rnd_cell
-(
-    .rst        (rst),
-    .clk        (clk),
-    .in_key     (key3_rnd_cell),
-    .out_key    (rnd_cell)
-);
-
 wire [9:0] point_pos_x;
 wire [9:0] point_pos_y;
-
 vga vga
 (
     .clk            (clk),
@@ -69,17 +49,19 @@ vga vga
     .point_pos_y    (point_pos_y)
 );
 
-wire point_inside;
-wire cell_is_on;
-
-localparam gd_bits = `GRID_SIZE_X * `GRID_SIZE_Y;
+wire [$clog2(`GRID_SIZE_X)-1:0] cell_pos_x;
+wire [$clog2(`GRID_SIZE_Y)-1:0] cell_pos_y;
+wire grid_point_inside;
+wire [1:0] grid_cell_type;
+localparam gd_bits = 2 * `GRID_SIZE_X * `GRID_SIZE_Y;
 reg [gd_bits-1:0] grid_data;
 grid
 #(
     .SIZE_X         (`GRID_SIZE_X),
     .SIZE_Y         (`GRID_SIZE_Y),
     .CELL_SIZE      (`GRID_CELL_SIZE),
-    .LINE_THICKNESS (`GRID_LINE_THICKNESS)
+    .LINE_THICKNESS (`GRID_LINE_THICKNESS),
+    .CELL_BITS      (2)
 ) grid
 (
     .pos_x          ((640 - `GRID_SIZE_X * `GRID_CELL_SIZE) / 2),
@@ -87,8 +69,17 @@ grid
     .point_pos_x    (point_pos_x),
     .point_pos_y    (point_pos_y),
     .data           (grid_data),
-    .point_inside   (point_inside),
-    .cell_is_on     (cell_is_on)
+    .point_inside   (grid_point_inside),
+    .cell_type      (grid_cell_type)
+);
+
+colors colors
+(
+    .grid_point_inside  (grid_point_inside),
+    .grid_cell_type     (grid_cell_type),
+    .red                (vga_r),
+    .green              (vga_g),
+    .blue               (vga_b)
 );
 
 wire [7:0] key;
@@ -103,33 +94,74 @@ keyboard keyboard
     .rdy        (key_pressed)
 );
 
-localparam gsx_bits = $clog2(`GRID_SIZE_X);
-wire [gsx_bits-1:0] rnd_x_pos;
-random
+wire tick;
+tick_timer
 #(
-    .MODULUS    (`GRID_SIZE_X)
-) random_rnd_x_pos
+    .MODULUS    (`TICK_TIME_CLK)
+) tick_timer
 (
     .clk    (clk),
     .rst    (rst),
-    .number (rnd_x_pos)
+    .incr   (1'd1),
+    .tick   (tick)
 );
 
-localparam gsy_bits = $clog2(`GRID_SIZE_Y);
-wire [gsy_bits-1:0] rnd_y_pos;
-random
+wire [1:0] beh;
+wire [1:0] snake_dir;
+key_control key_control
+(
+    .clk         (clk),
+    .rst         (rst),
+    .start       (beh[0]),
+    .key         (key),
+    .key_pressed (key_pressed),
+    .snake_dir   (snake_dir)
+);
+
+localparam SNAKE_SIZE = 8 * (`GRID_SIZE_X * `GRID_SIZE_Y) * 2;
+
+wire [15:0] snake_len;
+wire [1:0] true_key;
+wire [SNAKE_SIZE-1:0] snake_xy;
+wire snake2field;
+snake_calculate
 #(
-    .MODULUS    (`GRID_SIZE_Y)
-) random_rnd_y_pos
+    .SIZE_X         (`GRID_SIZE_X),
+    .SIZE_Y         (`GRID_SIZE_Y)
+) snake_calculate
+(
+    .clk      (clk),
+    .rst      (rst),
+    .step     (tick),
+    .start    (beh[0]),
+    .grow     (beh[1]),
+    .lengh    (snake_len),
+    .true_key (true_key),
+    .key      (snake_dir),
+    .snake_xy (snake_xy),
+    .snake2field (snake2field)
+);
+
+localparam FIELD_SIZE = (`GRID_SIZE_X * `GRID_SIZE_Y) * 2;
+
+wire field2apple;
+wire [15:0]	empty_cells;
+wire [FIELD_SIZE-1:0] field;
+field_calculate
+#(
+    .SIZE_X         (`GRID_SIZE_X),
+    .SIZE_Y         (`GRID_SIZE_Y)
+) field_calculate
 (
     .clk    (clk),
     .rst    (rst),
-    .number (rnd_y_pos)
+    .step   (snake2field),
+    .lengh      (snake_len),
+    .snake_xy   (snake_xy),
+    .empty_cells (empty_cells),
+    .field (field),
+    .field2apple (field2apple)
 );
-
-assign {vga_r, vga_g, vga_b} = point_inside & cell_is_on ? {8'hF0, 8'h50, 8'hA0} :
-                               point_inside ? {8'h00, 8'h00, 8'h00} :
-                               {8'h20, 8'h60, 8'h40};
 
 integer ix, iy;
 
@@ -140,13 +172,6 @@ begin
 
     else if (set)
         grid_data <= {gd_bits{1'd1}};
-
-    else if (rnd_cell)
-    begin
-        for (ix = 0; ix < `GRID_SIZE_X; ix = ix + 1)
-            for (iy = 0; iy < `GRID_SIZE_Y; iy = iy + 1)
-                grid_data[iy * `GRID_SIZE_X + ix] <= (rnd_x_pos == ix) & (rnd_y_pos == iy);
-    end
 
     else if (key_pressed)
     begin

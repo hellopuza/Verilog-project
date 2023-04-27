@@ -1,7 +1,8 @@
 module snake_calculate
 #(
 	parameter	SIZE_X	= 10, // set x field size
-	parameter	SIZE_Y	= 10  // set y field size
+	parameter	SIZE_Y	= 10, // set y field size
+	parameter   SNAKE_SIZE = 8 * (SIZE_X * SIZE_Y) * 2
 )
 (
 	input	wire	clk,   // clock signal
@@ -13,7 +14,8 @@ module snake_calculate
 
 	output	[15:0]	lengh, // snake's lengh
 	output	[1:0]	true_key, // don't changed value of prev_key if it's conflicted with new value
-	output	[8 * (SIZE_X * SIZE_Y) * 2 - 1:0]	snake_xy // array that contain snake's coordinates
+	output	[SNAKE_SIZE - 1:0]	snake_xy, // array that contain snake's coordinates
+	output  reg snake2field
 	// for each snake's cells need 2 baits for x and y coordinates := 8 * 2
 	// max snake's lengh is full grid := SIZE_X * SIZE_Y
 	// total size := SIZE_X * SIZE_Y * 2 * 8
@@ -29,7 +31,7 @@ reg [1:0] prev_key;									// remember previous diraction key
 reg [15:0]	counter = 16'b0;						// counter for operate loop 
 reg [15:0]	previus_l = 16'b0;						// remember previous snake's lengh
 reg [15:0]	current_l = 16'b0;						// current snake's lengh
-reg [8 * (SIZE_X * SIZE_Y) * 2 - 1:0] coordinates;	// buffer for snake's coordinates
+reg [SNAKE_SIZE - 1:0] coordinates;	// buffer for snake's coordinates
 integer Gi;
 
 assign true_key = prev_key;
@@ -38,6 +40,7 @@ assign lengh = previus_l;
 
 always @(posedge clk)
 begin
+	snake2field <= step;
 	if (start)
 	begin
 		// initial lengh = 4
