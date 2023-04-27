@@ -1,6 +1,6 @@
 `include "keys.v"
 
-`define GRID_SIZE_X 30
+`define GRID_SIZE_X 40
 `define GRID_SIZE_Y 30
 `define GRID_CELL_SIZE 10
 `define GRID_LINE_THICKNESS 1

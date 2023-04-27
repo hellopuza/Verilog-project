@@ -1,9 +1,9 @@
 module grid
 #(
-	parameter   SIZE_X         = 10,
-	parameter   SIZE_Y         = 10,
-	parameter   CELL_SIZE      = 10,
-	parameter   LINE_THICKNESS = 1,
+    parameter   SIZE_X         = 10,
+    parameter   SIZE_Y         = 10,
+    parameter   CELL_SIZE      = 10,
+    parameter   LINE_THICKNESS = 1,
     parameter   XBITS          = $clog2(SIZE_X),
     parameter   YBITS          = $clog2(SIZE_Y),
     parameter   GDBITS         = SIZE_X * SIZE_Y

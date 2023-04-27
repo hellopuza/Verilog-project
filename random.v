@@ -1,6 +1,6 @@
 module random
 #(
-	parameter   MODULUS = 10,
+    parameter   MODULUS = 10,
     parameter   NBITS   = $clog2(MODULUS)
 )
 (
