@@ -9,6 +9,7 @@ module field_calculate
 	input	wire	clk,   // clock signal
 	input	wire	rst,   // reset signal
 	input	wire	step,  // signal next step in game and refresh screen
+	input	wire	grow,
 	input	[15:0]	lengh, // snake's lengh
 	input	[SNAKE_SIZE - 1:0]	snake_xy, // array that contain snake's coordinates
 
@@ -20,8 +21,11 @@ module field_calculate
 );
 
 reg [15:0] emp_cells;
+reg [15:0] emp;
 reg [FIELD_SIZE - 1:0] temp_field;
 reg [15:0] temp;
+wire [6:0] rand;
+reg gen_flag;
 
 assign empty_cells = emp_cells;
 assign field = temp_field;
@@ -31,11 +35,9 @@ begin
 	field2apple <= step;
 	if (rst) 
 	begin
-		emp_cells <= 16'b0;	
-		for (temp = 0; temp < (FIELD_SIZE - 1); temp = temp + 1) 
-		begin
-			temp_field[temp] <= 1'b0;
-		end
+		emp_cells <= 16'b0;
+		emp <= 16'b0;
+		temp_field <= {FIELD_SIZE{1'b0}};
 	end
 	if (step) 
 	begin
@@ -48,5 +50,37 @@ begin
 			emp_cells = (temp_field[2 * temp] == 2'b01) ? emp_cells : emp_cells + 1;
 		end
 	end
+	if (grow)
+		gen_flag <= 1'b1;
+
+	if (gen_flag)
+	begin
+		if (rand > 99)
+		begin
+			if(field[(rand - 7'd100) * 2 + 1 : (rand - 7'd100) * 2] == 2'b00)
+			begin
+				field[(rand - 7'd100) * 2 + 1 : (rand - 7'd100) * 2] <= 2'b10;
+				gen_flag <= 1'b0;
+			end
+		end
+		else
+		begin
+			if(field[(rand) * 2 + 1 : (rand) * 2] == 2'b00)
+			begin
+				field[(rand) * 2 + 1 : (rand) * 2] <= 2'b10;
+				gen_flag <= 1'b0;
+			end
+		end
+	end
 end
+
+random
+#(
+	MODULUS(SIZE_X * SIZE_Y)
+) random
+(
+	.clk(clk),
+	.rst(rst),
+	.number(rand)
+);
 endmodule
