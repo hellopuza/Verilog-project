@@ -15,7 +15,8 @@ module field_calculate
 
 	output	[15:0]	empty_cells,				// number of empty cells
 	output	[FIELD_SIZE - 1:0]	field,	// describe field
-	output  reg field2apple
+	output  reg field2apple,
+	output  reg apple_done
 	// each cell contain 2 bits: 00 - cell empty, 01 - snake, 10 - apple, 11 - block
 	// total cell: SIZE_X * SIZE_Y
 );
@@ -38,20 +39,13 @@ begin
 		emp_cells <= 16'b0;
 		emp <= 16'b0;
 	end
-end
-
-always @(posedge clk) 
-begin
-	for (temp = 0; temp < (SIZE_X * SIZE_Y - 1); temp = temp + 1)
+	else
 	begin
-		emp_cells = (temp_field[2 * temp] == 2'b01) ? emp_cells : emp_cells + 1;
-	end	
-end
-
-always @(posedge clk) 
-begin
-	if (grow)
-		gen_flag <= 1'b1;
+		for (temp = 0; temp < (SIZE_X * SIZE_Y - 1); temp = temp + 1)
+		begin
+			emp_cells = (temp_field[2 * temp] == 2'b01) ? emp_cells : emp_cells + 1;
+		end	
+	end
 end
 
 genvar Gi;
@@ -82,7 +76,7 @@ begin: loop
 						if(temp_field[Gi*2+1 : Gi*2] == 2'b00)
 						begin
 							temp_field[Gi*2+1 : Gi*2] <= 2'b10;
-							gen_flag <= 1'b0;
+							gen_flag = 1'b0;
 						end
 					end
 				end
@@ -93,20 +87,28 @@ begin: loop
 						if(temp_field[Gi*2+1 : Gi*2] == 2'b00)
 						begin
 							temp_field[Gi*2+1 : Gi*2] <= 2'b10;
-							gen_flag <= 1'b0;
+							gen_flag = 1'b0;
 						end
 					end
 				end
 			end
-			else if (step)
+			else 
 			begin
-				for (temp = 0; temp < lengh; temp = temp + 1) 
+				if (step)
 				begin
-					if (snake_xy[temp] + snake_xy[temp + 8] * SIZE_X == Gi) 
+					for (temp = 0; temp < (SIZE_X * SIZE_Y - 1); temp = temp + 1) 
 					begin
-						temp_field[Gi * 2] <= 2'b01;
+						if (temp < lengh)
+						begin
+							if (snake_xy[temp] + snake_xy[temp + 8] * SIZE_X == Gi) 
+							begin
+								temp_field[Gi * 2] <= 2'b01;
+							end
+						end
 					end
 				end
+				if (grow & (Gi == 0))
+					gen_flag = 1'b1;
 			end
 		end
 	end
