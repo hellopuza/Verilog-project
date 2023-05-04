@@ -1,5 +1,5 @@
-`define GRID_SIZE_X 40
-`define GRID_SIZE_Y 30
+`define GRID_SIZE_X 20
+`define GRID_SIZE_Y 20
 `define GRID_CELL_SIZE 10
 `define GRID_LINE_THICKNESS 1
 `define TICK_TIME_CLK 12000000
@@ -145,6 +145,19 @@ localparam FIELD_SIZE = (`GRID_SIZE_X * `GRID_SIZE_Y) * 2;
 wire field2apple;
 wire [15:0]	empty_cells;
 wire [FIELD_SIZE-1:0] field;
+wire apple_asnwer;
+
+reg flag_grow;
+
+always @(posedge clk) 
+begin
+    if (beh[0])
+        flag_grow <= 1'b1;
+    else if (apple_asnwer)
+        flag_grow <= 1'b0;
+end
+
+
 field_calculate
 #(
     .SIZE_X         (`GRID_SIZE_X),
@@ -155,10 +168,12 @@ field_calculate
     .rst    (rst),
     .step   (snake2field),
     .lengh      (snake_len),
+    .grow   (flag_grow),
     .snake_xy   (snake_xy),
     .empty_cells (empty_cells),
     .field (field),
-    .field2apple (field2apple)
+    .field2apple (field2apple),
+    .apple_done(apple_asnwer)
 );
 
 game_behavior

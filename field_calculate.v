@@ -16,7 +16,7 @@ module field_calculate
 	output	[15:0]	empty_cells,				// number of empty cells
 	output	[FIELD_SIZE - 1:0]	field,	// describe field
 	output  reg field2apple,
-	output  reg apple_done
+	output  wire	apple_done
 	// each cell contain 2 bits: 00 - cell empty, 01 - snake, 10 - apple, 11 - block
 	// total cell: SIZE_X * SIZE_Y
 );
@@ -25,7 +25,6 @@ reg [15:0] emp_cells;
 reg [15:0] emp;
 reg [FIELD_SIZE - 1:0] temp_field;
 wire [6:0] rand;
-reg gen_flag;
 
 integer temp;
 assign empty_cells = emp_cells;
@@ -48,6 +47,10 @@ begin
 	end
 end
 
+reg [SIZE_X*SIZE_Y-1:0] check_any;
+
+assign apple_done = (check_any != {SIZE_X*SIZE_Y{1'b0}}) ? 1'b1 : 1'b0;
+
 genvar Gi;
 
 generate for (Gi = 0; Gi < SIZE_X * SIZE_Y; Gi = Gi + 1)
@@ -67,7 +70,7 @@ begin: loop
 		end
 		else
 		begin
-			if (gen_flag)
+			if (grow)
 			begin
 				if (rand > 99)
 				begin
@@ -76,7 +79,7 @@ begin: loop
 						if(temp_field[Gi*2+1 : Gi*2] == 2'b00)
 						begin
 							temp_field[Gi*2+1 : Gi*2] <= 2'b10;
-							gen_flag = 1'b0;
+							check_any[Gi] = 1'b1;
 						end
 					end
 				end
@@ -87,7 +90,7 @@ begin: loop
 						if(temp_field[Gi*2+1 : Gi*2] == 2'b00)
 						begin
 							temp_field[Gi*2+1 : Gi*2] <= 2'b10;
-							gen_flag = 1'b0;
+							check_any[Gi] = 1'b1;
 						end
 					end
 				end
@@ -107,8 +110,6 @@ begin: loop
 						end
 					end
 				end
-				if (grow & (Gi == 0))
-					gen_flag = 1'b1;
 			end
 		end
 	end

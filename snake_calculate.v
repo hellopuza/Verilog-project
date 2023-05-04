@@ -41,9 +41,9 @@ begin
 	if (rst)
 	begin
 		len <= 16'd0;
-		prev_key <= 16'd0;
+		prev_key <= 2'd0;
 		coordinates <= {SNAKE_SIZE{1'd0}};
-		snake2field <= 2'd0;
+		snake2field <= 1'd0;
 	end
 
 	snake2field <= step;
@@ -54,11 +54,11 @@ begin
 		prev_key <= 2'b11;
 		coordinates[7:0]   <=	SIZE_X / 10;
 		coordinates[15:8]  <=	SIZE_Y / 10;
-		coordinates[23:16] <=	coordinates[7:0] - 1;
+		coordinates[23:16] <=	coordinates[7:0] - 1'b1;;
 		coordinates[31:24] <=	coordinates[15:8];
-		coordinates[39:32] <=	coordinates[23:16] - 1;
+		coordinates[39:32] <=	coordinates[23:16] - 1'b1;
 		coordinates[47:40] <= coordinates[31:24];
-		coordinates[55:48] <= coordinates[39:32] - 1;
+		coordinates[55:48] <= coordinates[39:32] - 1'b1;
 		coordinates[63:56] <= coordinates[47:40];
 	end
 	else
@@ -75,7 +75,7 @@ begin
 			end
 			if (prev_key == 3'b00)
 			begin
-				coordinates[8] <= coordinates[8] + 1;
+				coordinates[8] <= coordinates[8] + 1'b1;
 			end
 			if (prev_key == 3'b11)
 			begin
