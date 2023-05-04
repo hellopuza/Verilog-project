@@ -12,10 +12,10 @@ module snake_calculate
 	input	wire	grow,  // signal that snake is grown
 	input	[1:0]	key,   // 00 - w, 01 - a, 11 - s, 10 - d
 
-	output	[15:0]	lengh, // snake's lengh
-	output	[1:0]	true_key, // don't changed value of prev_key if it's conflicted with new value
+	output	[15:0]				lengh, // snake's lengh
+	output	[1:0]				true_key, // don't changed value of prev_key if it's conflicted with new value
 	output	[SNAKE_SIZE - 1:0]	snake_xy, // array that contain snake's coordinates
-	output  reg snake2field
+	output  reg 				snake2field
 	// for each snake's cells need 2 baits for x and y coordinates := 8 * 2
 	// max snake's lengh is full grid := SIZE_X * SIZE_Y
 	// total size := SIZE_X * SIZE_Y * 2 * 8

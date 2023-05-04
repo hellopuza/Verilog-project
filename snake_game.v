@@ -1,5 +1,5 @@
-`define GRID_SIZE_X 20
-`define GRID_SIZE_Y 20
+`define GRID_SIZE_X 10
+`define GRID_SIZE_Y 10
 `define GRID_CELL_SIZE 10
 `define GRID_LINE_THICKNESS 1
 `define TICK_TIME_CLK 12000000
@@ -75,6 +75,10 @@ key_control key_control
 
 wire [$clog2(`GRID_SIZE_X)-1:0] cell_pos_x;
 wire [$clog2(`GRID_SIZE_Y)-1:0] cell_pos_y;
+
+localparam FIELD_SIZE = (`GRID_SIZE_X * `GRID_SIZE_Y) * 2;
+wire [FIELD_SIZE-1:0] field;
+
 wire grid_point_inside;
 wire [1:0] grid_cell_type;
 grid
@@ -116,30 +120,29 @@ snake_calculate
     .SIZE_Y         (`GRID_SIZE_Y)
 ) snake_calculate
 (
-    .clk      (clk),
-    .rst      (rst),
-    .step     (tick),
-    .start    (beh[0]),
-    .grow     (beh[1]),
-    .lengh    (snake_len),
-    .true_key (true_key),
-    .key      (snake_dir),
-    .snake_xy (snake_xy),
-    .snake2field (snake2field)
+    .clk            (clk),
+    .rst            (rst),
+    .step           (tick),
+    .start          (beh[0]),
+    .grow           (beh[1]),
+    .lengh          (snake_len),
+    .true_key       (true_key),
+    .key            (snake_dir),
+    .snake_xy       (snake_xy),
+    .snake2field    (snake2field)
 );
-
-localparam FIELD_SIZE = (`GRID_SIZE_X * `GRID_SIZE_Y) * 2;
 
 wire field2apple;
 wire [15:0]	empty_cells;
-wire [FIELD_SIZE-1:0] field;
 wire apple_asnwer;
 
 reg flag_grow;
 
 always @(posedge clk) 
 begin
-    if (beh[0])
+    if (rst)
+        flag_grow <= 1'b0;
+    else if (beh[0])
         flag_grow <= 1'b1;
     else if (apple_asnwer)
         flag_grow <= 1'b0;
@@ -151,16 +154,16 @@ field_calculate
     .SIZE_Y         (`GRID_SIZE_Y)
 ) field_calculate
 (
-    .clk    (clk),
-    .rst    (rst),
-    .step   (snake2field),
-    .lengh      (snake_len),
-    .grow   (flag_grow),
-    .snake_xy   (snake_xy),
-    .empty_cells (empty_cells),
-    .field (field),
-    .field2apple (field2apple),
-    .apple_done(apple_asnwer)
+    .clk            (clk),
+    .rst            (rst),
+    .step           (snake2field),
+    .lengh          (snake_len),
+    .grow           (flag_grow),
+    .snake_xy       (snake_xy),
+    .empty_cells    (empty_cells),
+    .field          (field),
+    .field2apple    (field2apple),
+    .apple_done     (apple_asnwer)
 );
 
 game_behavior
@@ -169,14 +172,14 @@ game_behavior
     .SIZE_Y         (`GRID_SIZE_Y)
 ) game_behavior
 (
-    .clk    (clk),
-    .rst    (beh[0]),
-    .check   (field2apple),
-    .key    (true_key),
+    .clk        (clk),
+    .rst        (beh[0]),
+    .check      (field2apple),
+    .key        (true_key),
     .snake_xy   (snake_xy),
-    .field (field),
-    .dead    (beh[0]),
-    .grow     (beh[1])
+    .field      (field),
+    .dead       (beh[0]),
+    .grow       (beh[1])
 );
 
 endmodule

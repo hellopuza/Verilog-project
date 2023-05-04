@@ -54,11 +54,13 @@ endgenerate
 assign cell_pos_x = indexes_x[SIZE_X-1];
 assign cell_pos_y = indexes_y[SIZE_Y-1];
 
-wire [$clog2(GDBITS)-1:0] index = (cell_pos_y * SIZE_X + cell_pos_x) * CELL_BITS;
+localparam INDBITS = $clog2(GDBITS);
+wire [INDBITS-1:0] index = (cell_pos_x == SIZE_X) | (cell_pos_y == SIZE_Y) ? SIZE_Y * SIZE_X * CELL_BITS :
+                           (cell_pos_y * SIZE_X + cell_pos_x) * CELL_BITS;
 
 generate for (Gi = 0; Gi < CELL_BITS; Gi = Gi + 1)
 begin: loop_cell
-    assign cell_type[Gi] = data[index + Gi];
+    assign cell_type[Gi] = (index == SIZE_Y * SIZE_X * CELL_BITS) ? {CELL_BITS{1'b0}} : data[index + Gi];
 end
 endgenerate
 
