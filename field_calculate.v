@@ -9,7 +9,6 @@ module field_calculate
 	input	wire	clk,   // clock signal
 	input	wire	rst,   // reset signal
 	input	wire	step,  // signal next step in game and refresh screen
-	input	wire	grow,
 	input	[15:0]	lengh, // snake's lengh
 	input	[SNAKE_SIZE - 1:0]	snake_xy, // array that contain snake's coordinates
 
@@ -33,54 +32,91 @@ assign field = temp_field;
 always @(posedge clk)
 begin
 	field2apple <= step;
-	if (rst) 
+	if (rst)
 	begin
 		emp_cells <= 16'b0;
 		emp <= 16'b0;
-		temp_field <= {{(FIELD_SIZE - 2){1'b0}}, 2'b10};
 	end
-	if (step) 
-	begin
-		for (temp = 0; temp < lengh; temp = temp + 1) 
-		begin
-			temp_field[snake_xy[temp] * 2 + snake_xy[temp + 8] * SIZE_X * 2] <= 2'b01;
-		end
-		for (temp = 0; temp < (SIZE_X * SIZE_Y - 1); temp = temp + 1)
-		begin
-			emp_cells = (temp_field[2 * temp] == 2'b01) ? emp_cells : emp_cells + 1;
-		end
-	end
-	if (grow)
-		gen_flag <= 1'b1;
+end
 
-	if (gen_flag)
+genvar Gi;
+
+generate for (Gi = 0; Gi < SIZE_X * SIZE_Y; Gi = Gi + 1)
+begin: loop
+	always @(posedge clk) 
 	begin
-		if (rand > 99)
+		if (rst)
 		begin
-			if(field[(rand - 7'd100) * 2 + 1 : (rand - 7'd100) * 2] == 2'b00)
+			if (Gi == 0)
 			begin
-				field[(rand - 7'd100) * 2 + 1 : (rand - 7'd100) * 2] <= 2'b10;
-				gen_flag <= 1'b0;
+				temp_field[Gi*2] <= 2'b10;
+			end
+			else
+			begin
+				temp_field[Gi*2] <= 2'b0;
 			end
 		end
 		else
 		begin
-			if(field[(rand) * 2 + 1 : (rand) * 2] == 2'b00)
+			if (step)
 			begin
-				field[(rand) * 2 + 1 : (rand) * 2] <= 2'b10;
-				gen_flag <= 1'b0;
+				for (temp = 0; temp < lengh; temp = temp + 1) 
+				begin
+					if (snake_xy[temp] + snake_xy[temp + 8] * SIZE_X == Gi) 
+					begin
+						temp_field[Gi * 2] <= 2'b01;
+					end
+				end
 			end
 		end
 	end
 end
+endgenerate
 
-random
-#(
-	MODULUS(SIZE_X * SIZE_Y)
-) random
-(
-	.clk(clk),
-	.rst(rst),
-	.number(rand)
-);
+// always @(posedge clk)
+// begin
+// 	if (step) 
+// 	begin
+// 		for (temp = 0; temp < lengh; temp = temp + 1) 
+// 		begin
+// 			temp_field[snake_xy[temp] * 2 + snake_xy[temp + 8] * SIZE_X * 2] <= 2'b01;
+// 		end
+
+// 		// need additional module
+// 		// for (temp = 0; temp < (SIZE_X * SIZE_Y - 1); temp = temp + 1)
+// 		// begin
+// 		// 	emp_cells = (temp_field[2 * temp] == 2'b01) ? emp_cells : emp_cells + 1;
+// 		// end
+// 	end
+// 		// temp
+// 	if (gen_flag)
+// 	begin
+// 		if (rand > 99)
+// 		begin
+// 			if(field[(rand - 7'd100) * 2 + 1 : (rand - 7'd100) * 2] == 2'b00)
+// 			begin
+// 				field[(rand - 7'd100) * 2 + 1 : (rand - 7'd100) * 2] <= 2'b10;
+// 				gen_flag <= 1'b0;
+// 			end
+// 		end
+// 		else
+// 		begin
+// 			if(field[(rand) * 2 + 1 : (rand) * 2] == 2'b00)
+// 			begin
+// 				field[(rand) * 2 + 1 : (rand) * 2] <= 2'b10;
+// 				gen_flag <= 1'b0;
+// 			end
+// 		end
+// 	end
+// end
+
+// get_random 
+// #(
+// 	MODULUS(SIZE_X * SIZE_Y)
+// ) get_random
+// (
+// 	.clk(clk),
+// 	.rst(rst),
+// 	.number(rand)
+// );
 endmodule
