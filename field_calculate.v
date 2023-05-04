@@ -112,48 +112,4 @@ begin: loop
 	end
 end
 endgenerate
-
-// always @(posedge clk)
-// begin
-// 	if (step) 
-// 	begin
-// 		for (temp = 0; temp < lengh; temp = temp + 1) 
-// 		begin
-// 			temp_field[snake_xy[temp] * 2 + snake_xy[temp + 8] * SIZE_X * 2] <= 2'b01;
-// 		end
-
-// 		// need additional module
-
-// 	end
-// 		// temp
-// 	if (gen_flag)
-// 	begin
-// 		if (rand > 99)
-// 		begin
-// 			if(field[(rand - 7'd100) * 2 + 1 : (rand - 7'd100) * 2] == 2'b00)
-// 			begin
-// 				field[(rand - 7'd100) * 2 + 1 : (rand - 7'd100) * 2] <= 2'b10;
-// 				gen_flag <= 1'b0;
-// 			end
-// 		end
-// 		else
-// 		begin
-// 			if(field[(rand) * 2 + 1 : (rand) * 2] == 2'b00)
-// 			begin
-// 				field[(rand) * 2 + 1 : (rand) * 2] <= 2'b10;
-// 				gen_flag <= 1'b0;
-// 			end
-// 		end
-// 	end
-// end
-
-// get_random 
-// #(
-// 	MODULUS(SIZE_X * SIZE_Y)
-// ) get_random
-// (
-// 	.clk(clk),
-// 	.rst(rst),
-// 	.number(rand)
-// );
 endmodule
