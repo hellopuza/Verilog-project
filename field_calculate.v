@@ -9,6 +9,7 @@ module field_calculate
 	input	wire	clk,   // clock signal
 	input	wire	rst,   // reset signal
 	input	wire	step,  // signal next step in game and refresh screen
+	input	wire	grow,
 	input	[15:0]	lengh, // snake's lengh
 	input	[SNAKE_SIZE - 1:0]	snake_xy, // array that contain snake's coordinates
 
@@ -39,6 +40,20 @@ begin
 	end
 end
 
+always @(posedge clk) 
+begin
+	for (temp = 0; temp < (SIZE_X * SIZE_Y - 1); temp = temp + 1)
+	begin
+		emp_cells = (temp_field[2 * temp] == 2'b01) ? emp_cells : emp_cells + 1;
+	end	
+end
+
+always @(posedge clk) 
+begin
+	if (grow)
+		gen_flag <= 1'b1;
+end
+
 genvar Gi;
 
 generate for (Gi = 0; Gi < SIZE_X * SIZE_Y; Gi = Gi + 1)
@@ -58,7 +73,32 @@ begin: loop
 		end
 		else
 		begin
-			if (step)
+			if (gen_flag)
+			begin
+				if (rand > 99)
+				begin
+					if (rand - 7'd100 == Gi)
+					begin
+						if(temp_field[Gi*2+1 : Gi*2] == 2'b00)
+						begin
+							temp_field[Gi*2+1 : Gi*2] <= 2'b10;
+							gen_flag <= 1'b0;
+						end
+					end
+				end
+				else
+				begin
+					if (rand == Gi)
+					begin
+						if(temp_field[Gi*2+1 : Gi*2] == 2'b00)
+						begin
+							temp_field[Gi*2+1 : Gi*2] <= 2'b10;
+							gen_flag <= 1'b0;
+						end
+					end
+				end
+			end
+			else if (step)
 			begin
 				for (temp = 0; temp < lengh; temp = temp + 1) 
 				begin
@@ -83,10 +123,7 @@ endgenerate
 // 		end
 
 // 		// need additional module
-// 		// for (temp = 0; temp < (SIZE_X * SIZE_Y - 1); temp = temp + 1)
-// 		// begin
-// 		// 	emp_cells = (temp_field[2 * temp] == 2'b01) ? emp_cells : emp_cells + 1;
-// 		// end
+
 // 	end
 // 		// temp
 // 	if (gen_flag)
