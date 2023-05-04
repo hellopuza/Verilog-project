@@ -85,6 +85,37 @@ key_control key_control
     .snake_dir   (snake_dir)
 );
 
+wire [$clog2(`GRID_SIZE_X)-1:0] cell_pos_x;
+wire [$clog2(`GRID_SIZE_Y)-1:0] cell_pos_y;
+wire grid_point_inside;
+wire [1:0] grid_cell_type;
+grid
+#(
+    .SIZE_X         (`GRID_SIZE_X),
+    .SIZE_Y         (`GRID_SIZE_Y),
+    .CELL_SIZE      (`GRID_CELL_SIZE),
+    .LINE_THICKNESS (`GRID_LINE_THICKNESS),
+    .CELL_BITS      (2)
+) grid
+(
+    .pos_x          ((640 - `GRID_SIZE_X * `GRID_CELL_SIZE) / 2),
+    .pos_y          ((480 - `GRID_SIZE_Y * `GRID_CELL_SIZE) / 2),
+    .point_pos_x    (point_pos_x),
+    .point_pos_y    (point_pos_y),
+    .data           (field),
+    .point_inside   (grid_point_inside),
+    .cell_type      (grid_cell_type)
+);
+
+colors colors
+(
+    .grid_point_inside  (grid_point_inside),
+    .grid_cell_type     (grid_cell_type),
+    .red                (vga_r),
+    .green              (vga_g),
+    .blue               (vga_b)
+);
+
 localparam SNAKE_SIZE = 8 * (`GRID_SIZE_X * `GRID_SIZE_Y) * 2;
 
 wire [15:0] snake_len;
@@ -127,8 +158,7 @@ field_calculate
     .snake_xy   (snake_xy),
     .empty_cells (empty_cells),
     .field (field),
-    .dead    (beh[0]),
-    .grow     (beh[1])
+    .field2apple (field2apple)
 );
 
 game_behavior
@@ -143,38 +173,8 @@ game_behavior
     .key    (true_key),
     .snake_xy   (snake_xy),
     .field (field),
-    .field2apple (field2apple)
-);
-
-wire [$clog2(`GRID_SIZE_X)-1:0] cell_pos_x;
-wire [$clog2(`GRID_SIZE_Y)-1:0] cell_pos_y;
-wire grid_point_inside;
-wire [1:0] grid_cell_type;
-grid
-#(
-    .SIZE_X         (`GRID_SIZE_X),
-    .SIZE_Y         (`GRID_SIZE_Y),
-    .CELL_SIZE      (`GRID_CELL_SIZE),
-    .LINE_THICKNESS (`GRID_LINE_THICKNESS),
-    .CELL_BITS      (2)
-) grid
-(
-    .pos_x          ((640 - `GRID_SIZE_X * `GRID_CELL_SIZE) / 2),
-    .pos_y          ((480 - `GRID_SIZE_Y * `GRID_CELL_SIZE) / 2),
-    .point_pos_x    (point_pos_x),
-    .point_pos_y    (point_pos_y),
-    .data           (field),
-    .point_inside   (grid_point_inside),
-    .cell_type      (grid_cell_type)
-);
-
-colors colors
-(
-    .grid_point_inside  (grid_point_inside),
-    .grid_cell_type     (grid_cell_type),
-    .red                (vga_r),
-    .green              (vga_g),
-    .blue               (vga_b)
+    .dead    (beh[0]),
+    .grow     (beh[1])
 );
 
 endmodule
