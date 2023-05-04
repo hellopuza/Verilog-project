@@ -168,7 +168,7 @@ game_behavior
 ) game_behavior
 (
     .clk    (clk),
-    .rst    (rst),
+    .rst    (beh[0]),
     .check   (field2apple),
     .key    (true_key),
     .snake_xy   (snake_xy),
