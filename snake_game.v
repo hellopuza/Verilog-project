@@ -87,7 +87,7 @@ grid
     .SIZE_Y         (`GRID_SIZE_Y),
     .CELL_SIZE      (`GRID_CELL_SIZE),
     .LINE_THICKNESS (`GRID_LINE_THICKNESS),
-    .CELL_BITS      (2)
+    .CELL_BITS      (3)
 ) grid
 (
     .pos_x          ((640 - `GRID_SIZE_X * `GRID_CELL_SIZE) / 2),
