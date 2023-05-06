@@ -50,15 +50,18 @@ keyboard keyboard
 );
 
 wire tick;
+reg [NBITS-1:0] seed;
+
 tick_timer
 #(
     .MODULUS    (`TICK_TIME_CLK)
 ) tick_timer
 (
-    .clk    (clk),
-    .rst    (rst),
-    .incr   (1'd1),
-    .tick   (tick)
+    .clk        (clk),
+    .rst        (rst),
+    .incr       (1'd1),
+    .tick       (tick),
+    .number     (seed)
 );
 
 wire start;

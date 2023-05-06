@@ -4,10 +4,11 @@ module tick_timer
     parameter   NBITS   = $clog2(MODULUS)
 )
 (
-    input   clk,
-    input   rst,
-    input   incr,
-    output  tick
+    input               clk,
+    input               rst,
+    input               incr,
+    output              tick,
+    output  [NBITS-1:0] number
 );
 
 wire [NBITS-1:0] number;
