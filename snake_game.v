@@ -50,6 +50,7 @@ keyboard keyboard
 );
 
 wire tick;
+reg [NBITS-1:0] random;
 reg [NBITS-1:0] seed;
 
 tick_timer
@@ -61,8 +62,14 @@ tick_timer
     .rst        (rst),
     .incr       (1'd1),
     .tick       (tick),
-    .number     (seed)
+    .number     (random)
 );
+
+always @(posedge clk)
+begin
+    if (key_pressed)
+        seed <= random;
+end
 
 wire start;
 wire pause;
