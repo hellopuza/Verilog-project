@@ -12,7 +12,7 @@ module possible_apple
 	output	wire	[SBITS*SIZE_X*SIZE_Y-1:0]	sets_seed
 );
 
-assign sets_seed[SBITS*SIZE_X*SIZE_Y-1:(SBITS-1)*SIZE_X*SIZE_Y] = SIZE_X*SIZE_Y-1;
+assign sets_seed[SBITS-1:0] = SIZE_X*SIZE_Y-1;
 
 genvar Gi;
 generate for (Gi = 1; Gi < SIZE_X*SIZE_Y; Gi = Gi + 1)
