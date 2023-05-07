@@ -167,7 +167,7 @@ begin
     end
 end
 
-wire [(SBITS+1)*SIZE_X*SIZE_Y-1:0]	plant;
+wire [SBITS*SIZE_X*SIZE_Y-1:0]	plant;
 
 possible_apple
 #(
