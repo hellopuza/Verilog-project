@@ -11,7 +11,7 @@ module tick_timer
     output  [NBITS-1:0] number
 );
 
-wire [NBITS-1:0] number;
+// wire [NBITS-1:0] number;
 
 counter
 #(

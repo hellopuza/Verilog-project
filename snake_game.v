@@ -50,8 +50,8 @@ keyboard keyboard
 );
 
 wire tick;
-reg [NBITS-1:0] random;
-reg [NBITS-1:0] seed;
+wire [$clog2(`TICK_TIME_CLK)-1:0] random;
+reg [$clog2(`TICK_TIME_CLK)-1:0] seed;
 
 tick_timer
 #(
@@ -137,6 +137,7 @@ snake_field
     .clk        (clk),
     .rst        (rst),
     .start      (start),
+    .seed       (seed[$clog2(`GRID_SIZE_X*`GRID_SIZE_Y)-1:0]),
     .step       (tick & is_running),
     .snake_dir  (snake_dir),
     .field      (field)
