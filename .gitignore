@@ -1,5 +1,6 @@
 db
 incremental_db
 output_files
-test_vga.qpf
-test_vga.qsf
+snake_game.qpf
+snake_game.qsf
+snake_game.qws
