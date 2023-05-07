@@ -61,6 +61,11 @@ wire eat_yourself = (true_dir == 2'd0) & (head_cell_u != 3'd0) & (head_cell_u !=
                     (true_dir == 2'd2) & (head_cell_r != 3'd0) & (head_cell_r != 3'd5) |
                     (true_dir == 2'd3) & (head_cell_l != 3'd0) & (head_cell_l != 3'd5);
 
+wire bump_in_wall = ((true_dir == 2'd0) & (head_pos_y == {YBITS{1'd0}})) |
+                    ((true_dir == 2'd1) & (head_pos_x == SIZE_X-1'd1))   |
+                    ((true_dir == 2'd2) & (head_pos_y == SIZE_Y-1'd1))   |
+                    ((true_dir == 2'd3) & (head_pos_x == {XBITS{1'd0}}));
+
 reg alive;
 
 integer ix;
@@ -135,43 +140,10 @@ begin
         // apple was eaten?
         if (apple_was_eaten)
         begin // grow
-            // search free cell starting at seed
-            shift_x = -1;
-            shift_y = -1;
-
-            for (iy = 0; iy < SIZE_Y; iy = iy + 1'd1)
-            begin
-                for (ix = 0; ix < SIZE_X; ix = ix + 1'd1)
-                begin
-                    if ((shift_x == -1) & (shift_y == -1))
-                    begin
-                        if (seed+ix+iy*SIZE_X < FIELD_SIZE)
-                        begin
-                            if ({field[(seed+ix+iy*SIZE_X)*2'd3+2'd2],
-                                 field[(seed+ix+iy*SIZE_X)*2'd3+1'd1],
-                                 field[(seed+ix+iy*SIZE_X)*2'd3]} == 3'd0)
-                            begin
-                                shift_x = ix;
-                                shift_y = iy;
-                            end
-                        end
-                        else
-                        begin
-                            if ({field[(seed+ix+iy*SIZE_X)*2'd3+2'd2-FIELD_SIZE],
-                                 field[(seed+ix+iy*SIZE_X)*2'd3+1'd1-FIELD_SIZE],
-                                 field[(seed+ix+iy*SIZE_X)*2'd3-FIELD_SIZE]} == 3'd0)
-                            begin
-                                shift_x = SIZE_X - ix;
-                                shift_y = SIZE_Y - iy;
-                            end
-                        end
-                    end
-                end
-            end
             // set new apple
-            {field[(seed+shift_x+shift_y*SIZE_X)*2'd3+2'd2],
-             field[(seed+shift_x+shift_y*SIZE_X)*2'd3+1'd1],
-             field[(seed+shift_x+shift_y*SIZE_X)*2'd3]} <= 3'd5;
+            {field[plant[seed]*2'd3+2'd2],
+             field[plant[seed]*2'd3+1'd1],
+             field[plant[seed]*2'd3]} <= 3'd5;
         end
         else
         begin // not grow
@@ -190,14 +162,22 @@ begin
         end
 
         // still alive?
-        if (eat_yourself)
-            alive <= 1'b0; // eat yourself
-
-        if (((true_dir == 2'd0) & (head_pos_y == {YBITS{1'd0}})) |
-            ((true_dir == 2'd1) & (head_pos_x == SIZE_X-1'd1))   |
-            ((true_dir == 2'd2) & (head_pos_y == SIZE_Y-1'd1))   |
-            ((true_dir == 2'd3) & (head_pos_x == {XBITS{1'd0}})))
-            alive <= 1'b0; // bump in wall
+        if (eat_yourself | bump_in_wall)
+            alive <= 1'b0;
     end
 end
+
+wire [(SBITS+1)*SIZE_X*SIZE_Y-1:0]	plant;
+
+possible_apple
+#(
+    .SIZE_X     (SIZE_X),
+    .SIZE_Y     (SIZE_Y)
+) possible_apple
+(
+    .seed       (seed),
+    .field      (field),
+    .sets_seed  (plant)
+);
+
 endmodule
