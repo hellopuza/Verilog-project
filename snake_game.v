@@ -144,7 +144,7 @@ snake_field
     .start      (start),
     .step       (tick & is_running),
     .snake_dir  (snake_dir),
-    .seed       (seed[$clog2(`GRID_SIZE_X*`GRID_SIZE_Y)-1:0]),
+    .seed       (seed[SBITS-1:0]),
     .field      (field),
     .apple_pos  (apple_pos)
 );

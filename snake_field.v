@@ -83,8 +83,6 @@ possible_apple
 
 integer ix;
 integer iy;
-integer shift_x;
-integer shift_y;
 
 localparam APPLE_POS_X = 5;
 localparam APPLE_POS_Y = 5;
@@ -109,7 +107,7 @@ begin
         begin
             for (ix = 0; ix < SIZE_X; ix = ix + 1'd1)
             begin
-                if (!((ix == APPLE_POS_X) & (ix == APPLE_POS_Y)))
+                if (!((ix == APPLE_POS_X) & (iy == APPLE_POS_Y)))
                 begin
                     {field[(iy * SIZE_X + ix) * 2'd3 + 2'd2],
                      field[(iy * SIZE_X + ix) * 2'd3 + 1'd1],
@@ -158,9 +156,7 @@ begin
         if (apple_was_eaten)
         begin // grow
             // set new apple
-            {field[apple_pos * 2'd3 + 2'd2],
-             field[apple_pos * 2'd3 + 1'd1],
-             field[apple_pos * 2'd3]} <= 3'd5;
+            {field[apple_pos * 2'd3 + 2'd2], field[apple_pos * 2'd3 + 1'd1], field[apple_pos * 2'd3]} <= 3'd5;
         end
         else
         begin // not grow

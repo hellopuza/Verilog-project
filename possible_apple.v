@@ -12,13 +12,13 @@ module possible_apple
     output  wire    [SBITS-1:0] apple_pos
 );
 
-wire [SBITS-1:0] sets_seed [SIZE_X*SIZE_Y-1:0];
-assign sets_seed[0] = sets_seed[SIZE_X*SIZE_Y-1];
+wire [SBITS-1:0] sets_seed [SIZE_X * SIZE_Y - 1:0];
+assign sets_seed[0] = SIZE_X * SIZE_Y - 1;
 
 genvar Gi;
-generate for (Gi = 1; Gi < SIZE_X*SIZE_Y; Gi = Gi + 1)
+generate for (Gi = 1; Gi < SIZE_X * SIZE_Y; Gi = Gi + 1)
 	begin: loop1
-		assign sets_seed[Gi] = (field[(Gi+1)*3-1:Gi*3] == 3'd0) ? Gi : sets_seed[Gi - 1];
+		assign sets_seed[Gi] = (field[(Gi + 1) * 3 - 1:Gi * 3] == 3'd0) ? Gi : sets_seed[Gi - 1];
 	end
 endgenerate
 
