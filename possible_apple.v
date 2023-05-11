@@ -6,19 +6,22 @@ module possible_apple
     parameter    SBITS = $clog2(SIZE_X * SIZE_Y)
 )
 (
-    input	wire    [SBITS-1:0] 		seed,
-    input	wire 	[FIELD_SIZE-1:0]    field,
+    input   wire    [SBITS-1:0] 		seed,
+    input   wire 	[FIELD_SIZE-1:0]    field,
 
-	output	wire	[SBITS*SIZE_X*SIZE_Y-1:0]	sets_seed
+    output  wire    [SBITS-1:0] apple_pos
 );
 
-assign sets_seed[SBITS-1:0] = SIZE_X*SIZE_Y-1;
+wire [SBITS-1:0] sets_seed [SIZE_X*SIZE_Y-1:0];
+assign sets_seed[0] = sets_seed[SIZE_X*SIZE_Y-1];
 
 genvar Gi;
 generate for (Gi = 1; Gi < SIZE_X*SIZE_Y; Gi = Gi + 1)
 	begin: loop1
-		assign sets_seed[(Gi+1)*SBITS-1:Gi*SBITS] = (field[(Gi+1)*3-1:Gi*3] == 3'd0) ? Gi : sets_seed[(Gi)*SBITS-1:(Gi-1)*SBITS];
+		assign sets_seed[Gi] = (field[(Gi+1)*3-1:Gi*3] == 3'd0) ? Gi : sets_seed[Gi - 1];
 	end
 endgenerate
+
+assign apple_pos = sets_seed[seed];
 
 endmodule

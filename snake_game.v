@@ -1,5 +1,5 @@
-`define GRID_SIZE_X 20
-`define GRID_SIZE_Y 20
+`define GRID_SIZE_X 10
+`define GRID_SIZE_Y 10
 `define GRID_CELL_SIZE 4'd10
 `define GRID_LINE_THICKNESS 4'd1
 `define TICK_TIME_CLK 12000000
@@ -17,7 +17,10 @@ module snake_game (
     output          vga_blank_n,
     output          vga_sync_n,
     output          vga_hs,
-    output          vga_vs
+    output          vga_vs,
+
+    output [6:0] segm0,
+    output [6:0] segm1
 );
 
 wire rst = ~key0_rst;
@@ -128,6 +131,8 @@ colors colors
     .blue               (vga_b)
 );
 
+localparam SBITS = $clog2(`GRID_SIZE_X * `GRID_SIZE_Y);
+wire [SBITS-1:0] apple_pos;
 snake_field
 #(
     .SIZE_X         (`GRID_SIZE_X),
@@ -140,7 +145,15 @@ snake_field
     .step       (tick & is_running),
     .snake_dir  (snake_dir),
     .seed       (seed[$clog2(`GRID_SIZE_X*`GRID_SIZE_Y)-1:0]),
-    .field      (field)
+    .field      (field),
+    .apple_pos  (apple_pos)
+);
+
+byte2sev_segm byte2sev_segm
+(
+    .byte  (apple_pos),
+    .segm0 (segm0),
+    .segm1 (segm1)
 );
 
 endmodule

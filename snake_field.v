@@ -13,7 +13,8 @@ module snake_field
     input   wire    [1:0]       snake_dir,
     input   wire    [SBITS-1:0] seed,
 
-    output  reg [FIELD_SIZE-1:0]    field
+    output  reg [FIELD_SIZE-1:0]    field,
+    output  wire [SBITS-1:0] apple_pos
     // each cell contain 3 bits: (0) 000 - cell empty, (1) 100 - snake up, (2) 010 - snake right
     // (3) 110 - snake down, (4) 001 snake left, (5) 101 - apple
 );
@@ -51,14 +52,14 @@ wire [2:0] head_cell_d = {field[head_pos_d + 2'd2], field[head_pos_d + 1'd1], fi
 wire [2:0] head_cell_r = {field[head_pos_r + 2'd2], field[head_pos_r + 1'd1], field[head_pos_r]};
 wire [2:0] head_cell_l = {field[head_pos_l + 2'd2], field[head_pos_l + 1'd1], field[head_pos_l]};
 
-wire apple_was_eaten = ((true_dir == 2'd0) & (head_cell_u == 3'd5)) |
-                       ((true_dir == 2'd1) & (head_cell_d == 3'd5)) |
-                       ((true_dir == 2'd2) & (head_cell_r == 3'd5)) |
-                       ((true_dir == 2'd3) & (head_cell_l == 3'd5));
+wire apple_was_eaten = (((true_dir == 2'd0) & (head_cell_u == 3'd5) & (head_pos_u != tail_pos)) |
+                        ((true_dir == 2'd1) & (head_cell_r == 3'd5) & (head_pos_r != tail_pos)) |
+                        ((true_dir == 2'd2) & (head_cell_d == 3'd5) & (head_pos_d != tail_pos)) |
+                        ((true_dir == 2'd3) & (head_cell_l == 3'd5) & (head_pos_l != tail_pos)));
 
 wire eat_yourself = (true_dir == 2'd0) & (head_cell_u != 3'd0) & (head_cell_u != 3'd5) |
-                    (true_dir == 2'd1) & (head_cell_d != 3'd0) & (head_cell_d != 3'd5) |
-                    (true_dir == 2'd2) & (head_cell_r != 3'd0) & (head_cell_r != 3'd5) |
+                    (true_dir == 2'd1) & (head_cell_r != 3'd0) & (head_cell_r != 3'd5) |
+                    (true_dir == 2'd2) & (head_cell_d != 3'd0) & (head_cell_d != 3'd5) |
                     (true_dir == 2'd3) & (head_cell_l != 3'd0) & (head_cell_l != 3'd5);
 
 wire bump_in_wall = ((true_dir == 2'd0) & (head_pos_y == {YBITS{1'd0}})) |
@@ -66,12 +67,28 @@ wire bump_in_wall = ((true_dir == 2'd0) & (head_pos_y == {YBITS{1'd0}})) |
                     ((true_dir == 2'd2) & (head_pos_y == SIZE_Y-1'd1))   |
                     ((true_dir == 2'd3) & (head_pos_x == {XBITS{1'd0}}));
 
-reg alive;
+wire alive = ~(eat_yourself | bump_in_wall);
+
+// wire [SBITS-1:0] apple_pos;
+possible_apple
+#(
+    .SIZE_X     (SIZE_X),
+    .SIZE_Y     (SIZE_Y)
+) possible_apple
+(
+    .seed       (seed),
+    .field      (field),
+    .apple_pos  (apple_pos)
+);
 
 integer ix;
 integer iy;
 integer shift_x;
 integer shift_y;
+
+localparam APPLE_POS_X = 5;
+localparam APPLE_POS_Y = 5;
+localparam APP_POS = (APPLE_POS_Y * SIZE_X + APPLE_POS_X) * 3;
 
 always @(posedge clk)
 begin
@@ -83,21 +100,21 @@ begin
         head_pos_y <= {XBITS{1'b0}};
         field <= {FIELD_SIZE{1'b0}};
         true_dir <= 2'd0;
-        alive <= 1'b0;
     end
     else if (start)
     begin
-        alive <= 1'b1;
-
-        field[2:0] <= 3'd5; // apple in (0,0) - mb will be fix
+        {field[APP_POS + 2'd2], field[APP_POS + 1'd1], field[APP_POS]} <= 3'd5;
 
         for (iy = 0; iy < SIZE_Y; iy = iy + 1'd1)
         begin
             for (ix = 0; ix < SIZE_X; ix = ix + 1'd1)
             begin
-                {field[(iy * SIZE_X + ix) * 2'd3 + 2'd2],
-                 field[(iy * SIZE_X + ix) * 2'd3 + 1'd1],
-                 field[(iy * SIZE_X + ix) * 2'd3]} <= ((1'd0 < ix) & (ix < 4'd5) & (iy == 1'd1)) ? 3'd2 : 3'd0;
+                if (!((ix == APPLE_POS_X) & (ix == APPLE_POS_Y)))
+                begin
+                    {field[(iy * SIZE_X + ix) * 2'd3 + 2'd2],
+                     field[(iy * SIZE_X + ix) * 2'd3 + 1'd1],
+                     field[(iy * SIZE_X + ix) * 2'd3]} <= ((1'd0 < ix) & (ix < 4'd5) & (iy == 1'd1)) ? 3'd2 : 3'd0;
+                end
             end
         end
 
@@ -141,9 +158,9 @@ begin
         if (apple_was_eaten)
         begin // grow
             // set new apple
-            {field[plant[seed]*2'd3+2'd2],
-             field[plant[seed]*2'd3+1'd1],
-             field[plant[seed]*2'd3]} <= 3'd5;
+            {field[apple_pos * 2'd3 + 2'd2],
+             field[apple_pos * 2'd3 + 1'd1],
+             field[apple_pos * 2'd3]} <= 3'd5;
         end
         else
         begin // not grow
@@ -160,24 +177,7 @@ begin
             // 3) clear previous tail cell if not grow
             {field[tail_pos + 2'd2], field[tail_pos + 1'd1], field[tail_pos]} <= 3'd0;
         end
-
-        // still alive?
-        if (eat_yourself | bump_in_wall)
-            alive <= 1'b0;
     end
 end
-
-wire [SBITS*SIZE_X*SIZE_Y-1:0]	plant;
-
-possible_apple
-#(
-    .SIZE_X     (SIZE_X),
-    .SIZE_Y     (SIZE_Y)
-) possible_apple
-(
-    .seed       (seed),
-    .field      (field),
-    .sets_seed  (plant)
-);
 
 endmodule
