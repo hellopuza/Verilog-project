@@ -1,6 +1,6 @@
 module counter
 #(
-    parameter   MODULUS = 10,
+    parameter   MODULUS = 8'd10,
     parameter   NBITS   = $clog2(MODULUS)
 )
 (
@@ -21,7 +21,7 @@ begin
         number <= data;
 
     else if (incr)
-        number <= (number == (MODULUS - 1)) ? {NBITS{1'd0}} : number + 1'd1;
+        number <= (number == (MODULUS - 1'd1)) ? {NBITS{1'd0}} : number + 1'd1;
 end
 
 endmodule

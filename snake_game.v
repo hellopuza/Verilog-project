@@ -1,5 +1,5 @@
-`define GRID_SIZE_X 10
-`define GRID_SIZE_Y 10
+`define GRID_SIZE_X 30
+`define GRID_SIZE_Y 20
 `define GRID_CELL_SIZE 4'd10
 `define GRID_LINE_THICKNESS 4'd1
 `define TICK_TIME_CLK 12000000
@@ -17,10 +17,7 @@ module snake_game (
     output          vga_blank_n,
     output          vga_sync_n,
     output          vga_hs,
-    output          vga_vs,
-
-    output [6:0] segm0,
-    output [6:0] segm1
+    output          vga_vs
 );
 
 wire rst = ~key0_rst;
@@ -54,7 +51,7 @@ keyboard keyboard
 
 wire tick;
 wire [$clog2(`TICK_TIME_CLK)-1:0] random;
-reg [$clog2(`TICK_TIME_CLK)-1:0] seed;
+reg  [$clog2(`TICK_TIME_CLK)-1:0] seed;
 
 tick_timer
 #(
@@ -74,9 +71,9 @@ begin
         seed <= random;
 end
 
-wire start;
-wire pause;
 wire [1:0] snake_dir;
+wire is_running;
+wire start;
 key_control key_control
 (
     .clk         (clk),
@@ -84,20 +81,9 @@ key_control key_control
     .key         (key),
     .key_pressed (key_pressed),
     .snake_dir   (snake_dir),
-    .start       (start),
-    .pause       (pause)
+    .is_running  (is_running),
+    .start       (start)
 );
-
-reg is_running;
-always @(posedge clk)
-begin
-    if (rst)
-        is_running <= 1'd0;
-    else if (start)
-        is_running <= 1'd1;
-    else if (pause)
-        is_running <= ~is_running;
-end
 
 localparam FIELD_SIZE = (`GRID_SIZE_X * `GRID_SIZE_Y) * 2'd3;
 wire [FIELD_SIZE-1:0] field;
@@ -122,38 +108,33 @@ grid
     .cell_type      (grid_cell_type)
 );
 
-colors colors
-(
-    .grid_point_inside  (grid_point_inside),
-    .grid_cell_type     (grid_cell_type),
-    .red                (vga_r),
-    .green              (vga_g),
-    .blue               (vga_b)
-);
-
 localparam SBITS = $clog2(`GRID_SIZE_X * `GRID_SIZE_Y);
-wire [SBITS-1:0] apple_pos;
+wire snake_alive;
 snake_field
 #(
     .SIZE_X         (`GRID_SIZE_X),
     .SIZE_Y         (`GRID_SIZE_Y)
 ) snake_field
 (
-    .clk        (clk),
-    .rst        (rst),
-    .start      (start),
-    .step       (tick & is_running),
-    .snake_dir  (snake_dir),
-    .seed       (seed[SBITS-1:0]),
-    .field      (field),
-    .apple_pos  (apple_pos)
+    .clk         (clk),
+    .rst         (rst),
+    .start       (start),
+    .step        (tick & is_running),
+    .snake_dir   (snake_dir),
+    .seed        (seed[SBITS-1:0]),
+    .field       (field),
+    .snake_alive (snake_alive)
 );
 
-byte2sev_segm byte2sev_segm
+colors colors
 (
-    .byte  (apple_pos),
-    .segm0 (segm0),
-    .segm1 (segm1)
+    .grid_point_inside  (grid_point_inside),
+    .grid_cell_type     (grid_cell_type),
+    .snake_alive        (snake_alive),
+    .is_running         (is_running),
+    .red                (vga_r),
+    .green              (vga_g),
+    .blue               (vga_b)
 );
 
 endmodule

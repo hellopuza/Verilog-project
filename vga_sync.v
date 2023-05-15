@@ -9,17 +9,17 @@ module vga_sync (
     output          blank_n
 );
 
-localparam h_front_t = 16;
-localparam h_sync_t = 96;
-localparam h_back_t = 48;
-localparam h_active_t = 640;
+localparam h_front_t = 10'd16;
+localparam h_sync_t = 10'd96;
+localparam h_back_t = 10'd48;
+localparam h_active_t = 10'd640;
 localparam h_blank_t = h_front_t + h_sync_t + h_back_t;
 localparam h_total_t = h_active_t + h_blank_t;
 
-localparam v_front_t = 10;
-localparam v_sync_t = 2;
-localparam v_back_t = 33;
-localparam v_active_t = 480;
+localparam v_front_t = 10'd10;
+localparam v_sync_t = 10'd2;
+localparam v_back_t = 10'd33;
+localparam v_active_t = 10'd480;
 localparam v_blank_t = v_front_t + v_sync_t + v_back_t;
 localparam v_total_t = v_active_t + v_blank_t;
 
@@ -39,13 +39,13 @@ begin
     end
     else
     begin
-        h_counter <= (h_counter == h_total_t - 1) ? 10'd0 : h_counter + 1'd1;
-        h_sync <= (h_counter < h_front_t - 1) | (h_counter > h_front_t + h_sync_t - 1);
+        h_counter <= (h_counter == h_total_t - 1'd1) ? 10'd0 : h_counter + 1'd1;
+        h_sync <= (h_counter < h_front_t - 1'd1) | (h_counter > h_front_t + h_sync_t - 1'd1);
 
-        if (h_counter == h_front_t + h_sync_t - 1)
+        if (h_counter == h_front_t + h_sync_t - 1'd1)
         begin
-            v_counter <= (v_counter == v_total_t - 1) ? 10'd0 : v_counter + 1'd1;
-            v_sync <= (v_counter < v_front_t - 1) | (v_counter > v_front_t + v_sync_t - 1);
+            v_counter <= (v_counter == v_total_t - 1'd1) ? 10'd0 : v_counter + 1'd1;
+            v_sync <= (v_counter < v_front_t - 1'd1) | (v_counter > v_front_t + v_sync_t - 1'd1);
         end
     end
 end

@@ -7,22 +7,33 @@ module key_control (
     input          key_pressed,
 
     output  reg     [1:0]   snake_dir,
-    output  wire            start,
-    output  wire            pause
+    output  reg             is_running,
+    output  wire            start
 );
 
 assign start = key_pressed & (key == `KEY_ENTER);
-assign pause = key_pressed & (key == `KEY_SPACE);
+wire   pause = key_pressed & (key == `KEY_SPACE);
 
 always @(posedge clk)
 begin
     if (rst)
+    begin
         snake_dir <= 2'd0;
+        is_running <= 1'd0;
+    end
 
     else if (start)
+    begin
         snake_dir <= 2'd1;
+        is_running <= 1'd1;
+    end
 
-    else if (key_pressed)
+    else if (pause)
+    begin
+        is_running <= ~is_running;
+    end
+
+    else if (key_pressed & is_running)
     begin
         if (key == `KEY_W)
             snake_dir <= 2'd0;
