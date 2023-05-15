@@ -2,7 +2,7 @@ module snake_field
 #(
     parameter    SIZE_X = 8'd10,
     parameter    SIZE_Y = 8'd10,
-    parameter    FIELD_SIZE = (SIZE_X * SIZE_Y) * 2'd3,
+    parameter    FIELD_BITS = (SIZE_X * SIZE_Y) * 2'd3,
     parameter    SBITS = $clog2(SIZE_X * SIZE_Y)
 )
 (
@@ -13,7 +13,7 @@ module snake_field
     input   wire    [1:0]       snake_dir,
     input   wire    [SBITS-1:0] seed,
 
-    output  reg     [FIELD_SIZE-1:0]    field,
+    output  reg     [FIELD_BITS-1:0]    field,
     output  wire    snake_alive
     // each cell contain 3 bits: (0) 000 - cell empty, (1) 100 - snake up, (2) 010 - snake right
     // (3) 110 - snake down, (4) 001 snake left, (5) 101 - apple
@@ -30,7 +30,7 @@ reg [YBITS-1:0] head_pos_y;
 
 reg [1:0] true_dir;
 
-localparam POSBITS = $clog2(FIELD_SIZE);
+localparam POSBITS = $clog2(FIELD_BITS);
 
 // calc tail and head positions on field
 wire [POSBITS-1:0] tail_pos = (tail_pos_y * SIZE_X + tail_pos_x) * 2'd3;
@@ -69,11 +69,11 @@ wire bump_in_wall = ((true_dir == 2'd0) & (head_pos_y == {YBITS{1'd0}})) |
 assign snake_alive = ~(eat_yourself | bump_in_wall);
 
 wire [POSBITS-1:0] apple_pos;
-possible_apple
+apple_generation
 #(
     .SIZE_X     (SIZE_X),
     .SIZE_Y     (SIZE_Y)
-) possible_apple
+) apple_generation
 (
     .seed       (seed),
     .field      (field),
@@ -95,7 +95,7 @@ begin
         tail_pos_y <= {XBITS{1'b0}};
         head_pos_x <= {XBITS{1'b0}};
         head_pos_y <= {XBITS{1'b0}};
-        field <= {FIELD_SIZE{1'b0}};
+        field <= {FIELD_BITS{1'b0}};
         true_dir <= 2'd0;
     end
     else if (start)

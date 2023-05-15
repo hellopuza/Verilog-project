@@ -1,5 +1,5 @@
-`define GRID_SIZE_X 30
-`define GRID_SIZE_Y 20
+`define GRID_SIZE_X 20
+`define GRID_SIZE_Y 15
 `define GRID_CELL_SIZE 4'd10
 `define GRID_LINE_THICKNESS 4'd1
 `define TICK_TIME_CLK 12000000
@@ -85,8 +85,8 @@ key_control key_control
     .start       (start)
 );
 
-localparam FIELD_SIZE = (`GRID_SIZE_X * `GRID_SIZE_Y) * 2'd3;
-wire [FIELD_SIZE-1:0] field;
+localparam FIELD_BITS = (`GRID_SIZE_X * `GRID_SIZE_Y) * 2'd3;
+wire [FIELD_BITS-1:0] field;
 
 wire grid_point_inside;
 wire [2:0] grid_cell_type;
