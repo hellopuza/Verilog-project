@@ -1,6 +1,6 @@
-`define GRID_SIZE_X 20
+`define GRID_SIZE_X 15
 `define GRID_SIZE_Y 15
-`define GRID_CELL_SIZE 4'd10
+`define GRID_CELL_SIZE 8'd20
 `define GRID_LINE_THICKNESS 4'd1
 `define TICK_TIME_CLK 12000000
 
@@ -17,7 +17,15 @@ module snake_game (
     output          vga_blank_n,
     output          vga_sync_n,
     output          vga_hs,
-    output          vga_vs
+    output          vga_vs,
+    output  [6:0]   segm0,
+    output  [6:0]   segm1,
+    output  [6:0]   segm2,
+    output  [6:0]   segm3,
+    output  [6:0]   segm4,
+    output  [6:0]   segm5,
+    output  [6:0]   segm6,
+    output  [6:0]   segm7
 );
 
 wire rst = ~key0_rst;
@@ -110,6 +118,18 @@ grid
 
 localparam SBITS = $clog2(`GRID_SIZE_X * `GRID_SIZE_Y);
 wire snake_alive;
+wire [SBITS-1:0] snake_len;
+reg  [SBITS-1:0] highscore;
+
+always @(posedge clk)
+begin
+    if (rst)
+        highscore <= {SBITS{1'd0}};
+
+    else if (start & (snake_len > highscore))
+        highscore <= snake_len;
+end
+
 snake_field
 #(
     .SIZE_X         (`GRID_SIZE_X),
@@ -123,7 +143,8 @@ snake_field
     .snake_dir   (snake_dir),
     .seed        (seed[SBITS-1:0]),
     .field       (field),
-    .snake_alive (snake_alive)
+    .snake_alive (snake_alive),
+    .snake_len   (snake_len)
 );
 
 colors colors
@@ -135,6 +156,49 @@ colors colors
     .red                (vga_r),
     .green              (vga_g),
     .blue               (vga_b)
+);
+
+wire [15:0] out_snake_len = snake_len;
+wire [15:0] out_highscore = highscore;
+
+byte2sev_segm
+#(
+    .NOTATION   (10)
+) byte2sev_segm0
+(
+    .byte   (out_snake_len[7:0]),
+    .segm0  (segm0),
+    .segm1  (segm1)
+);
+
+byte2sev_segm
+#(
+    .NOTATION   (10)
+) byte2sev_segm1
+(
+    .byte   (out_snake_len[15:8]),
+    .segm0  (segm2),
+    .segm1  (segm3)
+);
+
+byte2sev_segm
+#(
+    .NOTATION   (10)
+) byte2sev_segm2
+(
+    .byte   (out_highscore[7:0]),
+    .segm0  (segm4),
+    .segm1  (segm5)
+);
+
+byte2sev_segm
+#(
+    .NOTATION   (10)
+) byte2sev_segm3
+(
+    .byte   (out_highscore[15:8]),
+    .segm0  (segm6),
+    .segm1  (segm7)
 );
 
 endmodule

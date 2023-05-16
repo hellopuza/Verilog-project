@@ -8,27 +8,23 @@ module apple_generation
     parameter    POSBITS = $clog2(FIELD_BITS)
 )
 (
-    input   wire    [SBITS-1:0] 		seed,
-    input   wire 	[FIELD_BITS-1:0]    field,
+    input   wire    [SBITS-1:0]         seed,
+    input   wire    [FIELD_BITS-1:0]    field,
 
     output  wire    [POSBITS-1:0] apple_pos
 );
 
+/*
 genvar Gi;
-
 wire [SBITS-1:0] positions [FIELD_SIZE-1:0];
 assign positions[0] = seed;
 
 wire [POSBITS-1:0] field_positions [FIELD_SIZE-1:0];
-generate for (Gi = 0; Gi < FIELD_SIZE; Gi = Gi + 1)
-begin: field_pos_loop
-    assign field_positions[Gi] = ((positions[Gi] >= FIELD_SIZE) ? positions[Gi] - FIELD_SIZE : positions[Gi]) * 2'd3;
-end
-endgenerate
-
 wire [2:0] field_cells [FIELD_SIZE-1:0];
+
 generate for (Gi = 0; Gi < FIELD_SIZE; Gi = Gi + 1)
-begin: field_cells_loop
+begin: field_loop
+    assign field_positions[Gi] = ((positions[Gi] >= FIELD_SIZE) ? positions[Gi] - FIELD_SIZE : positions[Gi]) * 2'd3;
     assign field_cells[Gi] = {field[field_positions[Gi] + 2'd2], field[field_positions[Gi] + 1'd1], field[field_positions[Gi]]};
 end
 endgenerate
@@ -40,5 +36,18 @@ end
 endgenerate
 
 assign apple_pos = field_positions[FIELD_SIZE - 1];
+*/
+
+wire [SBITS-1:0] positions [FIELD_SIZE-1:0];
+assign positions[0] = positions[FIELD_SIZE - 1];
+
+genvar Gi;
+generate for (Gi = 1; Gi < FIELD_SIZE; Gi = Gi + 1)
+begin: loop
+    assign positions[Gi] = (field[Gi * 3 + 2:Gi * 3] == 3'd0) ? Gi : positions[Gi - 1];
+end
+endgenerate
+
+assign apple_pos = positions[seed] * 2'd3;
 
 endmodule

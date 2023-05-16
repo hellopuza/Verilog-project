@@ -2,7 +2,7 @@ module snake_field
 #(
     parameter    SIZE_X = 8'd10,
     parameter    SIZE_Y = 8'd10,
-    parameter    FIELD_BITS = (SIZE_X * SIZE_Y) * 2'd3,
+    parameter    FIELD_BITS = SIZE_X * SIZE_Y * 2'd3,
     parameter    SBITS = $clog2(SIZE_X * SIZE_Y)
 )
 (
@@ -14,7 +14,8 @@ module snake_field
     input   wire    [SBITS-1:0] seed,
 
     output  reg     [FIELD_BITS-1:0]    field,
-    output  wire    snake_alive
+    output  wire                        snake_alive,
+    output  reg     [SBITS-1:0]         snake_len
     // each cell contain 3 bits: (0) 000 - cell empty, (1) 100 - snake up, (2) 010 - snake right
     // (3) 110 - snake down, (4) 001 snake left, (5) 101 - apple
 );
@@ -91,12 +92,13 @@ always @(posedge clk)
 begin
     if (rst)
     begin
-        tail_pos_x <= {XBITS{1'b0}};
-        tail_pos_y <= {XBITS{1'b0}};
-        head_pos_x <= {XBITS{1'b0}};
-        head_pos_y <= {XBITS{1'b0}};
-        field <= {FIELD_BITS{1'b0}};
+        tail_pos_x <= {XBITS{1'd0}};
+        tail_pos_y <= {YBITS{1'd0}};
+        head_pos_x <= {XBITS{1'd0}};
+        head_pos_y <= {YBITS{1'd0}};
+        field <= {FIELD_BITS{1'd0}};
         true_dir <= 2'd0;
+        snake_len <= {SBITS{1'd0}};
     end
     else if (start)
     begin
@@ -120,6 +122,7 @@ begin
         head_pos_x <= 4'd4;
         head_pos_y <= 1'd1;
         true_dir <= 2'd1;
+        snake_len <= 3'd4;
     end
     else if (step & snake_alive)
     begin
@@ -156,6 +159,7 @@ begin
         begin // grow
             // set new apple
             {field[apple_pos + 2'd2], field[apple_pos + 1'd1], field[apple_pos]} <= 3'd5;
+            snake_len <= snake_len + 1'd1;
         end
         else
         begin // not grow

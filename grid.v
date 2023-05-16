@@ -2,7 +2,7 @@ module grid
 #(
     parameter   SIZE_X         = 8'd10,
     parameter   SIZE_Y         = 8'd10,
-    parameter   CELL_SIZE      = 4'd10,
+    parameter   CELL_SIZE      = 8'd10,
     parameter   LINE_THICKNESS = 4'd1,
     parameter   CELL_BITS      = 4'd1,
     parameter   XBITS          = $clog2(SIZE_X),
@@ -34,8 +34,8 @@ wire [9:0] bias_y = point_pos_y - pos_y;
 wire [XBITS-1:0] indexes_x [SIZE_X-1:0];
 wire [YBITS-1:0] indexes_y [SIZE_Y-1:0];
 
-assign indexes_x[0] = (bias_x >= 0) & (bias_x < CELL_SIZE - LINE_THICKNESS) ? {XBITS{1'd0}} : SIZE_X;
-assign indexes_y[0] = (bias_y >= 0) & (bias_y < CELL_SIZE - LINE_THICKNESS) ? {YBITS{1'd0}} : SIZE_Y;
+assign indexes_x[0] = (bias_x >= 10'd0) & (bias_x < CELL_SIZE - LINE_THICKNESS) ? {XBITS{1'd0}} : SIZE_X;
+assign indexes_y[0] = (bias_y >= 10'd0) & (bias_y < CELL_SIZE - LINE_THICKNESS) ? {YBITS{1'd0}} : SIZE_Y;
 
 genvar Gi;
 generate for (Gi = 1; Gi < SIZE_X; Gi = Gi + 1)
